@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T-Shirt Print Pricing Calculator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --ink: #1a1a18;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --rule: #c8c2b4;
+    --accent: #d4522a;
+    --accent-dim: #f0c4b0;
+    --green: #2d6a4f;
+    --green-light: #b7deca;
+    --blue: #1a4a7a;
+    --blue-light: #c2d8f0;
+    --yellow: #e8a020;
+    --yellow-light: #fde8b8;
+    --surface: #ffffff;
+    --muted: #7a7570;
+    --border: #ddd8ce;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  .page-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 2rem 2.5rem 1.5rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 4px solid var(--accent);
+  }
+
+  .page-header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .page-header h1 span { color: var(--accent); }
+
+  .page-header .subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #888;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .header-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 2px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 0;
+    min-height: calc(100vh - 90px);
+  }
+
+  .main-panel {
+    padding: 2rem 2.5rem;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+  }
+
+  .sidebar {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 2rem;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 90px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+
+  .section-header {
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-header .num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-dim);
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .section-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .section-body { padding: 1.25rem; }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .field-row.three { grid-template-columns: 1fr 1fr 1fr; }
+  .field-row.single { grid-template-columns: 1fr; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  input[type="number"], select {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 8px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--surface);
+    width: 100%;
+    transition: border-color 0.15s;
+    appearance: none;
+  }
+
+  input[type="number"]:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a7570'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+    cursor: pointer;
+  }
+
+  .input-group {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .input-group input {
+    border: none;
+    border-radius: 0;
+    flex: 1;
+  }
+
+  .input-group input:focus { outline: none; border: none; }
+
+  .prefix, .suffix {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--cream);
+    padding: 8px 10px;
+    border-right: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .suffix { border-right: none; border-left: 1px solid var(--border); }
+
+  .print-type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .print-card {
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--surface);
+    text-align: center;
+  }
+
+  .print-card:hover { border-color: var(--accent); }
+
+  .print-card.active {
+    border-color: var(--accent);
+    background: #fdf4f1;
+  }
+
+  .print-card .icon {
+    font-size: 22px;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .print-card .name {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+    display: block;
+    line-height: 1.2;
+  }
+
+  .print-card .desc {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+    display: block;
+  }
+
+  .print-card.active .name { color: var(--accent); }
+
+  .location-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .loc-card {
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+    padding: 8px 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    background: var(--surface);
+  }
+
+  .loc-card:hover, .loc-card.active {
+    border-color: var(--accent);
+    background: #fdf4f1;
+  }
+
+  .loc-card span {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+    display: block;
+  }
+
+  .loc-card.active span { color: var(--accent); font-weight: 500; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--cream);
+  }
+
+  .toggle-row:last-child { border-bottom: none; }
+
+  .toggle-label {
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  .toggle-label small {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  .toggle {
+    position: relative;
+    width: 38px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .toggle input { opacity: 0; width: 0; height: 0; }
+
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    left: 3px;
+    top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+
+  .toggle input:checked + .toggle-slider { background: var(--accent); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+  .sidebar h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 1rem;
+  }
+
+  .cost-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 5px 0;
+    border-bottom: 1px solid #2d2d2a;
+  }
+
+  .cost-line:last-of-type { border-bottom: none; }
+
+  .cost-line .label {
+    font-size: 12px;
+    color: #aaa;
+    flex: 1;
+  }
+
+  .cost-line .val {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--paper);
+    min-width: 70px;
+    text-align: right;
+  }
+
+  .cost-line .val.zero { color: #555; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #333;
+    margin: 1rem 0;
+  }
+
+  .total-block {
+    background: var(--accent);
+    border-radius: 4px;
+    padding: 1rem 1.25rem;
+    margin-top: auto;
+  }
+
+  .total-block .lbl {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 4px;
+  }
+
+  .total-block .amount {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .total-block .per-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 4px;
+  }
+
+  .margin-display {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: #252520;
+    border-radius: 3px;
+  }
+
+  .margin-display .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .margin-display .row:last-child { margin-bottom: 0; }
+
+  .margin-display .lbl {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #888;
+  }
+
+  .margin-display .val {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--paper);
+  }
+
+  .margin-display .val.good { color: #7ed4a4; }
+  .margin-display .val.warn { color: #f9c74f; }
+  .margin-display .val.bad { color: #f07070; }
+
+  .progress-bar {
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: #7ed4a4;
+    transition: width 0.3s ease;
+  }
+
+  .btn-export {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1px solid #444;
+    border-radius: 3px;
+    color: #aaa;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 1rem;
+  }
+
+  .btn-export:hover { border-color: var(--paper); color: var(--paper); }
+
+  .info-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 2px;
+    background: var(--yellow-light);
+    color: #7a4800;
+    margin-top: 6px;
+  }
+
+  .size-breakdown {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .size-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 90px;
+    align-items: center;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--cream);
+    gap: 8px;
+  }
+
+  .size-row:last-child { border-bottom: none; }
+
+  .size-row .size-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .size-row input[type="number"] {
+    padding: 4px 8px;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 2px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .size-row .upcharge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  .size-row .upcharge.has { color: var(--green); }
+
+  .tab-row {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.25rem;
+  }
+
+  .tab {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  .note {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 6px;
+  }
+
+  @media print {
+    .sidebar { position: relative; height: auto; }
+    .layout { grid-template-columns: 1fr 300px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <h1>T-Shirt Print <span>Pricing</span> Calculator</h1>
+    <p class="subtitle">Cost analysis &amp; profit margin tool</p>
+  </div>
+  <div class="header-badge">v1.0 &mdash; Portable</div>
+</div>
+
+<div class="layout">
+  <div class="main-panel">
+
+    <!-- SECTION 1: Order Basics -->
+    <div class="section">
+      <div class="section-header">
+        <div class="num">01</div>
+        <h2>Order Details</h2>
+      </div>
+      <div class="section-body">
+        <div class="field-row three">
+          <div class="field">
+            <label>Quantity (shirts)</label>
+            <input type="number" id="qty" value="12" min="1" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Shirt Base Cost ($)</label>
+            <div class="input-group">
+              <span class="prefix">$</span>
+              <input type="number" id="shirtCost" value="4.50" min="0" step="0.01" oninput="calc()">
+            </div>
+          </div>
+          <div class="field">
+            <label>Shirt Brand/Quality</label>
+            <select id="shirtQuality" onchange="applyShirtQuality()">
+              <option value="3.50">Economy (Gildan Heavy)</option>
+              <option value="4.50" selected>Standard (Gildan Soft Style)</option>
+              <option value="6.50">Premium (Bella+Canvas)</option>
+              <option value="8.00">Performance (Sport-Tek)</option>
+              <option value="12.00">Luxury (AS Colour)</option>
+              <option value="0">Custom (manual entry)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Size breakdown -->
+        <div class="field">
+          <label>Size Mix &amp; Upcharges</label>
+          <div class="size-breakdown" style="margin-top:6px;">
+            <div class="size-row">
+              <span class="size-label">S / M / L</span>
+              <input type="number" id="qtyBase" value="8" min="0" oninput="syncQty()" placeholder="Qty">
+              <span class="upcharge">+$0.00</span>
+            </div>
+            <div class="size-row">
+              <span class="size-label">XL</span>
+              <input type="number" id="qtyXL" value="3" min="0" oninput="syncQty()" placeholder="Qty">
+              <span class="upcharge">+$0.00</span>
+            </div>
+            <div class="size-row">
+              <span class="size-label">2XL</span>
+              <input type="number" id="qty2XL" value="1" min="0" oninput="syncQty()" placeholder="Qty">
+              <span class="upcharge has" id="uc2XL">+$2.00</span>
+            </div>
+            <div class="size-row">
+              <span class="size-label">3XL+</span>
+              <input type="number" id="qty3XL" value="0" min="0" oninput="syncQty()" placeholder="Qty">
+              <span class="upcharge has" id="uc3XL">+$3.00</span>
+            </div>
+          </div>
+          <p class="note">Size upcharges apply per oversized shirt. Adjust quantity to auto-sync totals.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: Print Method -->
+    <div class="section">
+      <div class="section-header">
+        <div class="num">02</div>
+        <h2>Print Method</h2>
+      </div>
+      <div class="section-body">
+        <div class="print-type-grid">
+          <div class="print-card active" id="card-dtf" onclick="selectPrint('dtf')">
+            <span class="icon">🎨</span>
+            <span class="name">DTF</span>
+            <span class="desc">Direct to Film</span>
+          </div>
+          <div class="print-card" id="card-htv" onclick="selectPrint('htv')">
+            <span class="icon">✂️</span>
+            <span class="name">HTV Vinyl</span>
+            <span class="desc">Heat Transfer</span>
+          </div>
+          <div class="print-card" id="card-screenprint" onclick="selectPrint('screenprint')">
+            <span class="icon">🖼️</span>
+            <span class="name">Screen Print</span>
+            <span class="desc">Traditional Ink</span>
+          </div>
+          <div class="print-card" id="card-dtg" onclick="selectPrint('dtg')">
+            <span class="icon">🖨️</span>
+            <span class="name">DTG</span>
+            <span class="desc">Direct to Garment</span>
+          </div>
+          <div class="print-card" id="card-sublimation" onclick="selectPrint('sublimation')">
+            <span class="icon">🌈</span>
+            <span class="name">Sublimation</span>
+            <span class="desc">Dye Infusion</span>
+          </div>
+          <div class="print-card" id="card-embroidery" onclick="selectPrint('embroidery')">
+            <span class="icon">🧵</span>
+            <span class="name">Embroidery</span>
+            <span class="desc">Thread &amp; Needle</span>
+          </div>
+        </div>
+
+        <div id="print-info" class="info-chip">
+          ⚡ DTF: No minimums, full color, works on most fabrics. Best for small runs.
+        </div>
+
+        <div style="margin-top:1.25rem;">
+          <div class="tab-row">
+            <button class="tab active" onclick="switchTab('print-cost', this)">Print Costs</button>
+            <button class="tab" onclick="switchTab('print-setup', this)">Setup &amp; Fixings</button>
+            <button class="tab" onclick="switchTab('print-locations', this)">Locations</button>
+          </div>
+
+          <div id="print-cost" class="tab-pane active">
+            <div class="field-row">
+              <div class="field">
+                <label>Print Cost Per Shirt ($)</label>
+                <div class="input-group">
+                  <span class="prefix">$</span>
+                  <input type="number" id="printCost" value="2.50" min="0" step="0.01" oninput="calc()">
+                </div>
+              </div>
+              <div class="field">
+                <label>Ink / Film Material Cost ($)</label>
+                <div class="input-group">
+                  <span class="prefix">$</span>
+                  <input type="number" id="inkCost" value="0.75" min="0" step="0.01" oninput="calc()">
+                </div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>No. of Colors / Layers</label>
+                <input type="number" id="numColors" value="3" min="1" max="12" oninput="calc()">
+              </div>
+              <div class="field">
+                <label>Color Complexity Upcharge ($)</label>
+                <div class="input-group">
+                  <span class="prefix">$</span>
+                  <input type="number" id="colorUpcharge" value="0.00" min="0" step="0.25" oninput="calc()">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="print-setup" class="tab-pane">
+            <div class="field-row">
+              <div class="field">
+                <label>Setup / Screen Fee ($)</label>
+                <div class="input-group">
+                  <span class="prefix">$</span>
+                  <input type="number" id="setupFee" value="25.00" min="0" step="1" oninput="calc()">
+                </div>
+              </div>
+              <div class="field">
+                <label>Art Separation / Digitizing ($)</label>
+                <div class="input-group">
+                  <span class="prefix">$</span>
+                  <input type="number" id="artFee" value="15.00" min="0" step="1" oninput="calc()">
+                </div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Press / Machine Time (min)</label>
+                <input type="number" id="machineMin" value="3" min="0" step="0.5" oninput="calc()">
+              </div>
+              <div class="field">
+                <label>Labor Rate ($/hr)</label>
+                <div class="input-group">
+                  <span class="prefix">$</span>
+                  <input type="number" id="laborRate" value="18.00" min="0" step="0.5" oninput="calc()">
+                </div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Pretreatment Cost (if DTG) ($)</label>
+                <div class="input-group">
+                  <span class="prefix">$</span>
+                  <input type="number" id="pretreament" value="0.00" min="0" step="0.10" oninput="calc()">
+                </div>
+              </div>
+              <div class="field">
+                <label>Curing / Heat Press Time (min)</label>
+                <input type="number" id="cureMin" value="1.5" min="0" step="0.5" oninput="calc()">
+              </div>
+            </div>
+          </div>
+
+          <div id="print-locations" class="tab-pane">
+            <p style="font-size:12px; color:var(--muted); margin-bottom:1rem;">Select all print locations on this order:</p>
+            <div class="location-grid">
+              <div class="loc-card active" id="loc-front" onclick="toggleLoc('front')"><span>Front Chest</span></div>
+              <div class="loc-card" id="loc-back" onclick="toggleLoc('back')"><span>Back</span></div>
+              <div class="loc-card" id="loc-leftsleeve" onclick="toggleLoc('leftsleeve')"><span>Left Sleeve</span></div>
+              <div class="loc-card" id="loc-rightsleeve" onclick="toggleLoc('rightsleeve')"><span>Right Sleeve</span></div>
+              <div class="loc-card" id="loc-collar" onclick="toggleLoc('collar')"><span>Neck Label</span></div>
+              <div class="loc-card" id="loc-pocket" onclick="toggleLoc('pocket')"><span>Pocket Area</span></div>
+              <div class="loc-card" id="loc-hem" onclick="toggleLoc('hem')"><span>Hem / Tag</span></div>
+              <div class="loc-card" id="loc-allover" onclick="toggleLoc('allover')"><span>All-Over</span></div>
+            </div>
+            <div class="field" style="margin-top:1rem;">
+              <label>Additional Location Cost Each ($)</label>
+              <div class="input-group">
+                <span class="prefix">$</span>
+                <input type="number" id="addLocCost" value="2.00" min="0" step="0.25" oninput="calc()">
+              </div>
+              <p class="note">The primary (first) location is included in print cost above. Each additional location adds this amount per shirt.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Overhead & Operations -->
+    <div class="section">
+      <div class="section-header">
+        <div class="num">03</div>
+        <h2>Overhead &amp; Operations</h2>
+      </div>
+      <div class="section-body">
+        <div class="field-row">
+          <div class="field">
+            <label>Packaging Cost (bags, tags) ($)</label>
+            <div class="input-group">
+              <span class="prefix">$</span>
+              <input type="number" id="packaging" value="0.35" min="0" step="0.05" oninput="calc()">
+            </div>
+          </div>
+          <div class="field">
+            <label>Hang Tags / Labels ($)</label>
+            <div class="input-group">
+              <span class="prefix">$</span>
+              <input type="number" id="hangTags" value="0.15" min="0" step="0.05" oninput="calc()">
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Folding / Pack Labor (min)</label>
+            <input type="number" id="packMin" value="1" min="0" step="0.5" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>QC / Waste Allowance (%)</label>
+            <div class="input-group">
+              <input type="number" id="wastePct" value="3" min="0" max="30" step="0.5" oninput="calc()">
+              <span class="suffix">%</span>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Shipping / Delivery (total $)</label>
+            <div class="input-group">
+              <span class="prefix">$</span>
+              <input type="number" id="shipping" value="12.00" min="0" step="0.50" oninput="calc()">
+            </div>
+          </div>
+          <div class="field">
+            <label>Payment Processing Fee (%)</label>
+            <div class="input-group">
+              <input type="number" id="payFee" value="2.9" min="0" max="10" step="0.1" oninput="calc()">
+              <span class="suffix">%</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:0.5rem;">
+          <div class="toggle-row">
+            <div class="toggle-label">
+              Rush Order Surcharge
+              <small>Add rush fee (enter amount below)</small>
+            </div>
+            <label class="toggle"><input type="checkbox" id="rushToggle" onchange="calc()"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="field-row" id="rushRow" style="display:none; margin-top:0.75rem;">
+            <div class="field">
+              <label>Rush Fee (per order $)</label>
+              <div class="input-group">
+                <span class="prefix">$</span>
+                <input type="number" id="rushFee" value="35.00" min="0" step="5" oninput="calc()">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: Pricing & Margin -->
+    <div class="section">
+      <div class="section-header">
+        <div class="num">04</div>
+        <h2>Pricing Strategy</h2>
+      </div>
+      <div class="section-body">
+        <div class="field-row">
+          <div class="field">
+            <label>Target Profit Margin (%)</label>
+            <div class="input-group">
+              <input type="number" id="margin" value="40" min="0" max="90" step="1" oninput="calc()">
+              <span class="suffix">%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Tax Rate (%)</label>
+            <div class="input-group">
+              <input type="number" id="taxRate" value="0" min="0" max="20" step="0.25" oninput="calc()">
+              <span class="suffix">%</span>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Volume Discount (%)</label>
+            <div class="input-group">
+              <input type="number" id="volDiscount" value="0" min="0" max="50" step="1" oninput="calc()">
+              <span class="suffix">%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Competitor / Target Price ($)</label>
+            <div class="input-group">
+              <span class="prefix">$</span>
+              <input type="number" id="competitorPrice" value="25.00" min="0" step="0.50" oninput="calc()">
+            </div>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">
+            Include Sales Tax in Quote
+            <small>Adds tax to customer-facing price</small>
+          </div>
+          <label class="toggle"><input type="checkbox" id="taxToggle" onchange="calc()"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end main-panel -->
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h3>Cost Breakdown</h3>
+
+    <div class="cost-line">
+      <span class="label">Shirt base cost</span>
+      <span class="val" id="s-shirt">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Size upcharges</span>
+      <span class="val" id="s-size">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Print / method cost</span>
+      <span class="val" id="s-print">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Ink / film material</span>
+      <span class="val" id="s-ink">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Color complexity</span>
+      <span class="val" id="s-color">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Additional locations</span>
+      <span class="val" id="s-locations">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Setup / screen fee</span>
+      <span class="val" id="s-setup">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Art / digitizing fee</span>
+      <span class="val" id="s-art">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Machine / press labor</span>
+      <span class="val" id="s-machine">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Cure / heat press labor</span>
+      <span class="val" id="s-cure">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Pretreatment</span>
+      <span class="val" id="s-pretreat">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Packaging</span>
+      <span class="val" id="s-pack">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Hang tags / labels</span>
+      <span class="val" id="s-tags">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Pack / fold labor</span>
+      <span class="val" id="s-foldlabor">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Waste / QC allowance</span>
+      <span class="val" id="s-waste">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Shipping (allocated)</span>
+      <span class="val" id="s-ship">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Rush surcharge</span>
+      <span class="val" id="s-rush">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label">Payment processing</span>
+      <span class="val" id="s-pay">$0.00</span>
+    </div>
+
+    <hr class="divider">
+
+    <div class="cost-line">
+      <span class="label" style="font-weight:500; color:#ccc;">Total Cost / Shirt</span>
+      <span class="val" id="s-costper" style="color:white; font-size:14px;">$0.00</span>
+    </div>
+    <div class="cost-line">
+      <span class="label" style="color:#888;">Total Order Cost</span>
+      <span class="val" id="s-totalcost">$0.00</span>
+    </div>
+
+    <hr class="divider">
+
+    <div class="total-block">
+      <div class="lbl">Sell Price Per Shirt</div>
+      <div class="amount" id="sellPrice">$0.00</div>
+      <div class="per-unit" id="sellTotal">$0.00 total order</div>
+    </div>
+
+    <div class="margin-display">
+      <div class="row">
+        <span class="lbl">Gross Margin</span>
+        <span class="val" id="marginPct">—</span>
+      </div>
+      <div class="row">
+        <span class="lbl">Gross Profit</span>
+        <span class="val" id="grossProfit">—</span>
+      </div>
+      <div class="row">
+        <span class="lbl">vs. Competitor</span>
+        <span class="val" id="vsCompetitor">—</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="marginBar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <button class="btn-export" onclick="exportSummary()">↓ Export Summary (HTML)</button>
+  </div>
+
+</div><!-- end layout -->
+
+<script>
+const printInfo = {
+  dtf: "⚡ DTF: No minimums, full color, works on most fabrics. Best for small runs.",
+  htv: "✂️ HTV Vinyl: Great for simple designs, bold colors. Labor-intensive for complex art.",
+  screenprint: "🖼️ Screen Print: Lowest per-unit cost at scale (24+). Requires screens per color.",
+  dtg: "🖨️ DTG: Photo-realistic prints. Requires pretreatment on dark fabrics; slower per-unit.",
+  sublimation: "🌈 Sublimation: Vivid all-over prints. Only works on polyester / light fabric.",
+  embroidery: "🧵 Embroidery: Premium, durable look. Best for logos. Priced by stitch count."
+};
+
+const printDefaults = {
+  dtf:         { printCost: 2.50, inkCost: 0.75, setupFee: 25, artFee: 15, machineMin: 3, cureMin: 1.5, pretreament: 0 },
+  htv:         { printCost: 3.00, inkCost: 1.25, setupFee: 10, artFee: 20, machineMin: 4, cureMin: 2,   pretreament: 0 },
+  screenprint: { printCost: 1.75, inkCost: 0.50, setupFee: 65, artFee: 35, machineMin: 1, cureMin: 1,   pretreament: 0 },
+  dtg:         { printCost: 4.50, inkCost: 1.50, setupFee: 0,  artFee: 10, machineMin: 6, cureMin: 3,   pretreament: 1.25 },
+  sublimation: { printCost: 3.50, inkCost: 1.00, setupFee: 20, artFee: 25, machineMin: 4, cureMin: 2,   pretreament: 0 },
+  embroidery:  { printCost: 5.00, inkCost: 0.80, setupFee: 45, artFee: 40, machineMin: 8, cureMin: 0,   pretreament: 0 }
+};
+
+let selectedPrint = 'dtf';
+let activeLocs = new Set(['front']);
+
+function selectPrint(type) {
+  selectedPrint = type;
+  document.querySelectorAll('.print-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('card-' + type).classList.add('active');
+  document.getElementById('print-info').textContent = printInfo[type];
+  const d = printDefaults[type];
+  document.getElementById('printCost').value = d.printCost;
+  document.getElementById('inkCost').value = d.inkCost;
+  document.getElementById('setupFee').value = d.setupFee;
+  document.getElementById('artFee').value = d.artFee;
+  document.getElementById('machineMin').value = d.machineMin;
+  document.getElementById('cureMin').value = d.cureMin;
+  document.getElementById('pretreament').value = d.pretreament;
+  calc();
+}
+
+function toggleLoc(id) {
+  const el = document.getElementById('loc-' + id);
+  if (activeLocs.has(id)) {
+    if (activeLocs.size === 1) return;
+    activeLocs.delete(id);
+    el.classList.remove('active');
+  } else {
+    activeLocs.add(id);
+    el.classList.add('active');
+  }
+  calc();
+}
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function applyShirtQuality() {
+  const val = parseFloat(document.getElementById('shirtQuality').value);
+  if (val > 0) document.getElementById('shirtCost').value = val.toFixed(2);
+  calc();
+}
+
+function syncQty() {
+  const base = parseInt(document.getElementById('qtyBase').value) || 0;
+  const xl = parseInt(document.getElementById('qtyXL').value) || 0;
+  const xl2 = parseInt(document.getElementById('qty2XL').value) || 0;
+  const xl3 = parseInt(document.getElementById('qty3XL').value) || 0;
+  document.getElementById('qty').value = base + xl + xl2 + xl3;
+  calc();
+}
+
+function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
+function i(id) { return parseInt(document.getElementById(id).value) || 0; }
+function chk(id) { return document.getElementById(id).checked; }
+
+function fmt(n) { return '$' + n.toFixed(2); }
+function pctFmt(n) { return n.toFixed(1) + '%'; }
+
+function calc() {
+  const qty = Math.max(1, i('qty'));
+  const qtyBase = i('qtyBase');
+  const qty2XL = i('qty2XL');
+  const qty3XL = i('qty3XL');
+
+  const shirtCost = v('shirtCost');
+  const printCost = v('printCost');
+  const inkCost = v('inkCost');
+  const colorUpcharge = v('colorUpcharge');
+  const setupFee = v('setupFee');
+  const artFee = v('artFee');
+  const machineMin = v('machineMin');
+  const cureMin = v('cureMin');
+  const laborRate = v('laborRate');
+  const pretreat = v('pretreament');
+  const packaging = v('packaging');
+  const hangTags = v('hangTags');
+  const packMin = v('packMin');
+  const wastePct = v('wastePct') / 100;
+  const shipping = v('shipping');
+  const payFeePct = v('payFee') / 100;
+  const rushFee = chk('rushToggle') ? v('rushFee') : 0;
+  const marginPct = v('margin') / 100;
+  const taxRate = v('taxRate') / 100;
+  const volDiscount = v('volDiscount') / 100;
+  const addLocCost = v('addLocCost');
+  const competitorPrice = v('competitorPrice');
+
+  const extraLocs = Math.max(0, activeLocs.size - 1);
+  const sizeUpcharge = (qty2XL * 2) + (qty3XL * 3);
+
+  const machineLaborPer = (machineMin / 60) * laborRate;
+  const cureLaborPer = (cureMin / 60) * laborRate;
+  const packLaborPer = (packMin / 60) * laborRate;
+
+  const perShirtBase =
+    shirtCost +
+    printCost +
+    inkCost +
+    colorUpcharge +
+    pretreat +
+    (extraLocs * addLocCost) +
+    machineLaborPer +
+    cureLaborPer +
+    packaging +
+    hangTags +
+    packLaborPer;
+
+  const orderFixed = setupFee + artFee + shipping + rushFee;
+  const perShirtFixed = orderFixed / qty;
+  const perShirtSizeUp = sizeUpcharge / qty;
+
+  const subtotalPer = perShirtBase + perShirtFixed + perShirtSizeUp;
+  const wastePer = subtotalPer * wastePct;
+  const costBeforePayment = subtotalPer + wastePer;
+
+  const sellPreTax = costBeforePayment / (1 - marginPct - payFeePct);
+  const sellAfterDiscount = sellPreTax * (1 - volDiscount);
+  const tax = chk('taxToggle') ? sellAfterDiscount * taxRate : 0;
+  const finalSell = sellAfterDiscount + tax;
+
+  const payProcessing = finalSell * payFeePct;
+  const totalCostPer = costBeforePayment + payProcessing;
+  const totalOrderCost = totalCostPer * qty;
+  const totalOrderSell = finalSell * qty;
+  const actualMargin = (finalSell - totalCostPer) / finalSell;
+  const grossProfit = (finalSell - totalCostPer) * qty;
+
+  const set = (id, val, zero) => {
+    const el = document.getElementById(id);
+    el.textContent = fmt(val);
+    el.className = val === 0 ? 'val zero' : 'val';
+  };
+
+  set('s-shirt', shirtCost * qty);
+  set('s-size', sizeUpcharge);
+  set('s-print', printCost * qty);
+  set('s-ink', inkCost * qty);
+  set('s-color', colorUpcharge * qty);
+  set('s-locations', extraLocs * addLocCost * qty);
+  set('s-setup', setupFee);
+  set('s-art', artFee);
+  set('s-machine', machineLaborPer * qty);
+  set('s-cure', cureLaborPer * qty);
+  set('s-pretreat', pretreat * qty);
+  set('s-pack', packaging * qty);
+  set('s-tags', hangTags * qty);
+  set('s-foldlabor', packLaborPer * qty);
+  set('s-waste', wastePer * qty);
+  set('s-ship', shipping);
+  set('s-rush', rushFee);
+  set('s-pay', payProcessing * qty);
+
+  document.getElementById('s-costper').textContent = fmt(totalCostPer);
+  document.getElementById('s-totalcost').textContent = fmt(totalOrderCost);
+  document.getElementById('sellPrice').textContent = fmt(finalSell);
+  document.getElementById('sellTotal').textContent = fmt(totalOrderSell) + ' total order';
+
+  const mPct = actualMargin * 100;
+  const mEl = document.getElementById('marginPct');
+  mEl.textContent = pctFmt(mPct);
+  mEl.className = mPct >= 35 ? 'val good' : mPct >= 20 ? 'val warn' : 'val bad';
+
+  const gpEl = document.getElementById('grossProfit');
+  gpEl.textContent = fmt(grossProfit);
+  gpEl.className = grossProfit >= 0 ? 'val good' : 'val bad';
+
+  const diff = finalSell - competitorPrice;
+  const vsEl = document.getElementById('vsCompetitor');
+  if (diff > 0) {
+    vsEl.textContent = '+' + fmt(diff) + ' above';
+    vsEl.className = 'val warn';
+  } else if (diff < 0) {
+    vsEl.textContent = fmt(diff) + ' below';
+    vsEl.className = 'val good';
+  } else {
+    vsEl.textContent = 'At market';
+    vsEl.className = 'val';
+  }
+
+  const barWidth = Math.min(100, Math.max(0, mPct));
+  document.getElementById('marginBar').style.width = barWidth + '%';
+  document.getElementById('marginBar').style.background =
+    mPct >= 35 ? '#7ed4a4' : mPct >= 20 ? '#f9c74f' : '#f07070';
+
+  document.getElementById('rushRow').style.display = chk('rushToggle') ? 'block' : 'none';
+
+  return {
+    qty, finalSell, totalOrderSell, totalCostPer, totalOrderCost,
+    grossProfit, mPct, shirtCost, printCost
+  };
+}
+
+function exportSummary() {
+  const d = calc();
+  const now = new Date().toLocaleDateString();
+  const html = `<!DOCTYPE html><html><head><title>Print Quote ${now}</title>
+<style>body{font-family:sans-serif;max-width:700px;margin:40px auto;color:#222;} h1{color:#d4522a;} table{width:100%;border-collapse:collapse;margin:1rem 0;} td,th{padding:8px 12px;border:1px solid #ddd;font-size:13px;} th{background:#f5f2eb;text-align:left;} .total{font-size:1.4rem;font-weight:700;color:#d4522a;} .footer{margin-top:2rem;color:#888;font-size:12px;}</style>
+</head><body>
+<h1>T-Shirt Print Quote</h1>
+<p>Generated: ${now} &mdash; Print Method: ${selectedPrint.toUpperCase()}</p>
+<table>
+<tr><th>Item</th><th>Per Shirt</th><th>Order Total (${d.qty} shirts)</th></tr>
+<tr><td>Total Production Cost</td><td>$${d.totalCostPer.toFixed(2)}</td><td>$${d.totalOrderCost.toFixed(2)}</td></tr>
+<tr><td><strong>Sell Price</strong></td><td class="total">$${d.finalSell.toFixed(2)}</td><td><strong>$${d.totalOrderSell.toFixed(2)}</strong></td></tr>
+<tr><td>Gross Profit</td><td colspan="2">$${d.grossProfit.toFixed(2)} (${d.mPct.toFixed(1)}% margin)</td></tr>
+</table>
+<p class="footer">This quote is an estimate. Final pricing may vary.</p>
+</body></html>`;
+  const blob = new Blob([html], {type:'text/html'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'print-quote-' + now.replace(/\//g,'-') + '.html'; a.click();
+}
+
+calc();
+</script>
+</body>
+</html>
